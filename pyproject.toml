@@ -36,10 +36,12 @@ push = false
 
 [tool.bumpver.file_patterns]
 "pyproject.toml" = [
-    'current_version = "{version}"',
+    'version = "{version}"',
+]
+"green_migration/__init__.py" = [
+    'version = \'{version}\'',
 ]
 "README.md" = [
     "{version}",
-    "{pep440_version}",
 ]
 
