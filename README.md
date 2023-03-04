@@ -27,3 +27,9 @@ At step 3, if the migration contains a field drop, the server will be down.
 At step 3, it will modify `drop` migration to `nullable and blankable` migration, this will help both old and new code to work.
 
 At step 7, it will read the output from step 3 to drop fields, this will help to clean up the database.
+
+## Installation
+1. Install package
+```pip install django-green-migrations```
+2. Add `green_migrations` to `INSTALLED_APPS`
+3. Setup deployment like above explanation (make sure don't commit changes at step 3 to git)
