@@ -17,11 +17,11 @@ At step 3, if the migration contains a field drop, the server will be down.
 ## Green deployment
 1. Deploy new code to server
 2. Keep server running
-3. Run green migration ```python manage.py green_migrate```
+3. Run green migration ```python manage.py green_migrate > output.json```
 4. Run migrations
 5. Switch to new code
 6. Destroy old code
-7. Run pos green migration ```python manage.py pos_green_migrate```
+7. Run pos green migration ```python manage.py pos_green_migrate output.json```
 
 At step 3, it will modify `drop` migration to `nullable and blankable` migration, this will help both old and new code to work.
 

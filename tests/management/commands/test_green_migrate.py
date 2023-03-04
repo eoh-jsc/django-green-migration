@@ -4,9 +4,9 @@ from io import StringIO
 
 from django.apps import apps
 from django.core.management import call_command
+from django.test import TestCase
 
-from common.tests.isolated_cache_test_case import TestCase
-from libraries.green_migration.tests.management.commands.fake_temp_model import FakeTempModelTest
+from tests.management.commands.fake_temp_model import FakeTempModelTest
 
 
 class GreenMigrateTest(FakeTempModelTest, TestCase):
@@ -18,7 +18,7 @@ class GreenMigrateTest(FakeTempModelTest, TestCase):
         self.migration_file = f'{self.app_path}/migrations/0001_initial.py'
         with open(self.migration_file, 'w'):
             pass
-        self.start_fake_temp_model('libraries.green_migration.management.commands.green_migrate.apps')
+        self.start_fake_temp_model('green_migration.management.commands.green_migrate.apps')
 
     def tearDown(self) -> None:
         super().tearDown()

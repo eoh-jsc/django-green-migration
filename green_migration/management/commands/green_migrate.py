@@ -33,7 +33,6 @@ class Command(BaseCommand):
                 for model, removed_field_names in self.get_removed_field_and_model(removed_fields).items():
                     removed_apps_fields[migration_file['app']][model] += removed_field_names
 
-        self.stdout.write('------------------deleted_fields------------------')
         self.stdout.write(json.dumps(removed_apps_fields))
 
     def get_removed_field_and_model(self, removed_fields):
