@@ -1,0 +1,31 @@
+name: Unittest
+
+on:
+  pull_request:
+
+concurrency:
+  group: unittest-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  run-unittest:
+    runs-on: ubuntu-latest
+    container: python
+    services:
+      postgres:
+        image: mdillon/postgis:11
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: db
+      redis:
+        image: redis
+    if: ${{ needs.need-run-unittest.outputs.should-run != 'no'}}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install libraries
+        run: |
+          pip install -r requirements.txt
+      - name: Run django test
+        run: coverage run manage.py test

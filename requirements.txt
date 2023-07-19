@@ -10,3 +10,5 @@ django==4.1.7
     # via django-green-migration (pyproject.toml)
 sqlparse==0.4.3
     # via django
+coverage-7.2.7
+    # via django-green-migration (pyproject.toml)
