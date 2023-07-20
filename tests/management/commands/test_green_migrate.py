@@ -216,7 +216,6 @@ class Migration(migrations.Migration):
 
     def test_not_change_field_that_ignored(self):
         file_content = """
-# gm: ignore
 from django.db import migrations, models
 import django.db.models.deletion
 
@@ -243,7 +242,30 @@ class Migration(migrations.Migration):
 
         self.assertEqual(
             content.strip(),
-            file_content.strip(),
+            """
+from django.db import migrations, models
+import django.db.models.deletion
+
+
+class Migration(migrations.Migration):
+
+    initial = True
+
+    dependencies = [
+    ]
+
+    operations = [
+        migrations.RemoveField(  # gm: ignore
+            model_name='temp_model',
+            name='config',
+        ),
+        migrations.AlterField(
+            model_name='temp_model',
+            name='config2',
+            field=models.CharField(blank=True, null=True, max_length=254),
+        ),
+    ]
+            """.strip(),
         )
 
         output = stdout.getvalue().split('------------------deleted_fields------------------')[-1]
