@@ -48,6 +48,8 @@ class Command(BaseCommand):
         lines = content.splitlines()
         line_nos = []
         for index, line in enumerate(lines):
+            if line.startswith('# gm: ignore'):
+                return []
             if line.endswith('migrations.RemoveField('):
                 line_nos.append({
                     'line': index,
@@ -71,9 +73,6 @@ class Command(BaseCommand):
         filename = migration_file['file']
         with open(filename) as f:
             content = f.read()
-
-        if 'migrations.RemoveField(' not in content:
-            return
 
         if 'models.' not in content:
             content = content.replace('from django.db import migrations', 'from django.db import migrations, models')

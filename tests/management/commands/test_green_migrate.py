@@ -25,10 +25,19 @@ class GreenMigrateTest(FakeTempModelTest, TestCase):
         os.unlink(self.migration_file)
         self.stop_fake_temp_model()
 
-    def test_update_migration_file_char_field(self):
+    def run_green_migration(self, content):
         with open(self.migration_file, 'w') as f:
-            f.write(
-                """
+            f.write(content)
+
+        stdout = StringIO()
+        call_command('green_migrate', stdout=stdout)
+        with open(self.migration_file) as f:
+            content = f.read()
+        return content, stdout
+
+    def test_update_migration_file_char_field(self):
+        content, stdout = self.run_green_migration(
+            """
 from django.db import migrations, models
 import django.db.models.deletion
 
@@ -54,11 +63,7 @@ class Migration(migrations.Migration):
         ),
     ]
 """,
-            )
-        stdout = StringIO()
-        call_command('green_migrate', stdout=stdout)
-        with open(self.migration_file) as f:
-            content = f.read()
+        )
 
         self.assertEqual(
             content.strip(),
@@ -101,9 +106,8 @@ class Migration(migrations.Migration):
         )
 
     def test_update_migration_only_1_delete_field(self):
-        with open(self.migration_file, 'w') as f:
-            f.write(
-                """
+        content, stdout = self.run_green_migration(
+            """
 from django.db import migrations
 
 
@@ -121,11 +125,7 @@ class Migration(migrations.Migration):
         ),
     ]
 """,
-            )
-        stdout = StringIO()
-        call_command('green_migrate', stdout=stdout)
-        with open(self.migration_file) as f:
-            content = f.read()
+        )
 
         self.assertEqual(
             content.strip(),
@@ -151,9 +151,7 @@ class Migration(migrations.Migration):
         )
 
     def test_not_update_migration_file_if_no_remove_field(self):
-        with open(self.migration_file, 'w') as f:
-            f.write(
-                """
+        file_content = """
 from django.db import migrations, models
 import django.db.models.deletion
 
@@ -174,13 +172,73 @@ class Migration(migrations.Migration):
             ],
         ),
     ]
-""",
-            )
+"""
+        content, stdout = self.run_green_migration(file_content)
 
-        stdout = StringIO()
-        call_command('green_migrate', stdout=stdout)
-        with open(self.migration_file) as f:
-            content = f.read()
+        self.assertEqual(
+            content.strip(),
+            file_content.strip(),
+        )
+
+        output = stdout.getvalue().split('------------------deleted_fields------------------')[-1]
+        self.assertEqual(output.strip(), json.dumps({}))
+
+    def test_not_update_migration_file_if_file_is_ignored(self):
+        file_content = """
+# gm: ignore
+from django.db import migrations, models
+import django.db.models.deletion
+
+
+class Migration(migrations.Migration):
+
+    initial = True
+
+    dependencies = [
+    ]
+
+    operations = [
+        migrations.RemoveField(
+            model_name='temp_model',
+            name='config',
+        ),
+    ]
+"""
+        content, stdout = self.run_green_migration(file_content)
+
+        self.assertEqual(
+            content.strip(),
+            file_content.strip(),
+        )
+
+        output = stdout.getvalue().split('------------------deleted_fields------------------')[-1]
+        self.assertEqual(output.strip(), json.dumps({}))
+
+    def test_not_change_field_that_ignored(self):
+        file_content = """
+from django.db import migrations, models
+import django.db.models.deletion
+
+
+class Migration(migrations.Migration):
+
+    initial = True
+
+    dependencies = [
+    ]
+
+    operations = [
+        migrations.RemoveField(  # gm: ignore
+            model_name='temp_model',
+            name='config',
+        ),
+        migrations.RemoveField(
+            model_name='temp_model',
+            name='config2',
+        ),
+    ]
+"""
+        content, stdout = self.run_green_migration(file_content)
 
         self.assertEqual(
             content.strip(),
@@ -197,16 +255,22 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.CreateModel(
-            name='temp_model',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('config', models.IntegerField(default=5)),
-            ],
+        migrations.RemoveField(  # gm: ignore
+            model_name='temp_model',
+            name='config',
+        ),
+        migrations.AlterField(
+            model_name='temp_model',
+            name='config2',
+            field=models.CharField(blank=True, null=True, max_length=254),
         ),
     ]
-""".strip(),
+            """.strip(),
         )
 
         output = stdout.getvalue().split('------------------deleted_fields------------------')[-1]
-        self.assertEqual(output.strip(), json.dumps({}))
+        self.assertEqual(output.strip(), json.dumps({
+            'green_migration': {
+                'temp_model': ['config2'],
+            },
+        }))
