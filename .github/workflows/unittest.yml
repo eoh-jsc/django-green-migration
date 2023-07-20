@@ -39,3 +39,4 @@ jobs:
         run: coverage xml
       - name: Submit code coverage
         run: codecov
+      - uses: codecov/codecov-action@v3
