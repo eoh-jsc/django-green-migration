@@ -32,3 +32,20 @@ At step 7, it will read the output from step 3 to drop fields, this will help to
 ```pip install django-green-migration```
 2. Add `green_migration` to `INSTALLED_APPS`
 3. Setup deployment like above explanation (make sure don't commit changes at step 3 to git)
+
+## Usage
+Run this before running `python manage.py migrate`
+```python manage.py green_migrate > output.json```
+
+Run this after running `python manage.py migrate`
+```python manage.py pos_green_migrate output.json```
+
+## Skip migration
+### Skip file
+Add `# gm: ignore` to the top of the file
+
+### Skip field
+Add `# gm: ignore` to the end of the line
+```python
+migrations.RemoveField(  # gm: ignore
+```
