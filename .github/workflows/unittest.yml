@@ -1,8 +1,9 @@
 name: Unittest
 
 on:
-  branch:
-    - main
+  push:
+    branches:
+      - main
   pull_request:
 
 concurrency:
