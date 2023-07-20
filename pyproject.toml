@@ -41,7 +41,3 @@ push = false
 "green_migration/__init__.py" = [
     "version = '{version}'",
 ]
-"README.md" = [
-    "{version}",
-]
-
