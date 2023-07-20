@@ -1,0 +1,4 @@
+[report]
+omit =
+    green_migration/migrations/0001_initial.py
+    manage.py
