@@ -71,6 +71,8 @@ class Command(BaseCommand):
         filename = migration_file['file']
         with open(filename) as f:
             content = f.read()
+        if content.startswith('# gm: ignore'):
+            return
 
         if 'migrations.RemoveField(' not in content:
             return
