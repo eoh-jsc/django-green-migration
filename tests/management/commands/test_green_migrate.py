@@ -274,3 +274,73 @@ class Migration(migrations.Migration):
                 'temp_model': ['config2'],
             },
         }))
+
+    def test_update_migration_file_with_double_quotes(self):
+        content, stdout = self.run_green_migration(
+            """
+from django.db import migrations, models
+import django.db.models.deletion
+
+
+class Migration(migrations.Migration):
+
+    initial = True
+
+    dependencies = [
+    ]
+
+    operations = [
+        migrations.CreateModel(
+            name="temp_model",
+            fields=[
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("config", models.CharField(default="5", max_length=10)),
+            ],
+        ),
+        migrations.RemoveField(
+            model_name="temp_model",
+            name="config",
+        ),
+    ]
+""",
+        )
+
+        self.assertEqual(
+            content.strip(),
+            """
+from django.db import migrations, models
+import django.db.models.deletion
+
+
+class Migration(migrations.Migration):
+
+    initial = True
+
+    dependencies = [
+    ]
+
+    operations = [
+        migrations.CreateModel(
+            name="temp_model",
+            fields=[
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("config", models.CharField(default="5", max_length=10)),
+            ],
+        ),
+        migrations.AlterField(
+            model_name="temp_model",
+            name="config",
+            field=models.CharField(blank=True, null=True, max_length=254),
+        ),
+    ]
+""".strip(),
+        )
+
+        output = stdout.getvalue().split('------------------deleted_fields------------------')[-1]
+        self.assertEqual(
+            output.strip(), json.dumps({
+                'green_migration': {
+                    'temp_model': ['config'],
+                },
+            }),
+        )

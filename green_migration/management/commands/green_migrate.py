@@ -44,6 +44,13 @@ class Command(BaseCommand):
 
         return removed_app_fields
 
+    def extract_quoted_value(self, line):
+        """Extract value from a line containing either single or double quotes."""
+        if '"' in line:
+            return line.strip().split('"')[1]
+        else:
+            return line.strip().split("'")[1]
+
     def get_removed_fields(self, content):
         lines = content.splitlines()
         line_nos = []
@@ -53,8 +60,8 @@ class Command(BaseCommand):
             if line.endswith('migrations.RemoveField('):
                 line_nos.append({
                     'line': index,
-                    'model': lines[index + 1].strip().split("'")[1],
-                    'field': lines[index + 2].strip().split("'")[1],
+                    'model': self.extract_quoted_value(lines[index + 1]),
+                    'field': self.extract_quoted_value(lines[index + 2]),
                 })
 
         line_nos.reverse()
