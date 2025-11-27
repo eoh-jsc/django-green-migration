@@ -1,5 +1,5 @@
 # django-green-migrations
-Version 1.1.2
+Version 1.1.3
 
 While the server is running,
 if you deploy a new version which contains a migration that drop a field, it will make your production down. 
